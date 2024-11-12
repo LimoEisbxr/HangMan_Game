@@ -27,7 +27,7 @@ class HangmanGame:
         
     ################ WIP ##################
     def check_if_word_is_valid(self, word: str):
-        print(self.wordlist_content)
+        # print(self.wordlist_content)
         if word in self.wordlist_content:
             return True
         else:
@@ -89,7 +89,7 @@ class HangmanGame:
                 
     def get_secret_word(self):
         while self.secret_word == None:
-            secret_word_input = input("Bitte gib das geheime Wort ein (ohne, dass die anderen Mitspieler zuschauen!): ")
+            secret_word_input = input("Bitte gib das geheime Wort ein (ohne, dass die anderen Mitspieler zuschauen!): ").lower().strip()
             err = self.check_if_word_is_valid(secret_word_input)
             if not err:
                 print("Bitte gib ein gültiges deutsches Wort ein!")
