@@ -7,11 +7,14 @@ class HangmanGame:
     def __init__(self) -> None:
         # Variablen auf Standartwert initialisieren
         self.easy_mode = None
+        self.game_running = None
         
-        self.secret_word = None
-        self.guessed_letters = []
+        self.secret_word_upper = None
+        self.secret_word_lower = None
+        self.wrong_letters = []
         self.right_letters = []
         self.num_wrong_words = 0
+        self.lives_remaining = 6
         
         self.hangmans = get_hangmans()
         
@@ -22,39 +25,90 @@ class HangmanGame:
         self.prepare_wordlist()
         
     def start_game(self) -> None:
+        self.clear_console()
         while True:
             self.get_game_settings()
+            self.game_running = True
+            
+            while self.game_running: 
+                self.print_gui()
+                
+                word_output = self.generate_word_output()
+                print(" ".join(word_output))
+                
+                user_input = self.get_user_input()
+                right_input, game_won = self.process_user_input(user_input)
+                
+                if not right_input:
+                    self.lives_remaining -= 1
+                    
+                if self.lives_remaining == 0:
+                    self.game_running = False
+                    # printe was zum Tod hier
+                    
+                if game_won:
+                    self.game_running = False
+                    # printe was schönes hier zum feierlichen Sieg
         
     ################ WIP ##################
-    def check_if_word_is_valid(self, word: str):
-        # print(self.wordlist_content)
-        if word in self.wordlist_content:
-            return True
-        else:
-            return False
-        
+    
     def get_game_settings(self) -> None:
         """Geheimes Wort und den "Spielmodus" vom Benutzer bekommen
         """
         
         # Variablen zurücksetzen, falls sie bereits beschrieben wurden
-        self.secret_word = None
+        self.secret_word_upper = None
+        self.secret_word_lower = None
         self.easy_mode = None
         
         # Usereingabe für das geheime Wort bekommen und überprüfen, ob es ein valides deutsches Wort ist
+        self.clear_console()
         self.get_secret_word()
+        self.clear_console()
         
         self.ask_game_mode()
         
+    def get_user_input(self) -> str:
+        user_input = ""
+        while user_input == "":
+            user_input = input("Gib deinen nächsten Buchstaben oder das Lösungswort ein: ")
+            
+        return user_input
+    
+    def process_user_input(self, user_input: str):
+        user_input_upper = user_input.upper().strip()
+        if len(user_input) != 1:
+            if user_input_upper == self.secret_word_upper:
+                return True, True
+            else:
+                return False, False
+            
+        else:
+            # if user_input_upper not in self.wrong_letters:
+            #     self.wrong_letters.append(user_input_upper)
+            if user_input_upper in self.right_letters and self.easy_mode:
+                # Logik für easy mode
+                pass
+            elif user_input_upper in self.secret_word_upper:
+                self.right_letters.append(user_input_upper)
+                return True, False
+            else:
+                self.wrong_letters.append(user_input_upper)
+                return False, False
+        
     def print_gui(self) -> None:
-        number_wrong_words = len(self.guessed_letters)
+        self.clear_console()
+        number_wrong_words = len(self.wrong_letters)
         print(self.hangmans[number_wrong_words])
         pass
     
+    def clear_console(self) -> None:
+        os.system("cls" if os.name == "nt" else "clear")
+    
     def generate_word_output(self) -> list:
-        word_output = ["_"]*len(self.secret_word)
+        word_output = ["_"]*len(self.secret_word_upper)
         for char in self.right_letters:
-            for i, letter in enumerate(self.secret_word):
+            for i, letter in enumerate(self.secret_word_upper):
                 if letter == char:
                     word_output[i] = char
                     
@@ -88,13 +142,22 @@ class HangmanGame:
                 print("Ungültige Eingabe! - mögliche Eingaben: Y - N")
                 
     def get_secret_word(self):
-        while self.secret_word == None:
-            secret_word_input = input("Bitte gib das geheime Wort ein (ohne, dass die anderen Mitspieler zuschauen!): ").lower().strip()
-            err = self.check_if_word_is_valid(secret_word_input)
+        while self.secret_word_upper == None:
+            secret_word_input = input("Bitte gib das geheime Wort ein (ohne, dass die anderen Mitspieler zuschauen!): ").strip()
+            secret_word_input_lower = secret_word_input.lower()
+            err = self.check_if_word_is_valid(secret_word_input_lower)
             if not err:
                 print("Bitte gib ein gültiges deutsches Wort ein!")
             else:
-                self.secret_word = secret_word_input
+                self.secret_word_upper = secret_word_input.upper()
+                self.secret_word_lower = secret_word_input_lower
+                
+    def check_if_word_is_valid(self, word: str):
+        # print(self.wordlist_content)
+        if word in self.wordlist_content:
+            return True
+        else:
+            return False
             
 if __name__ == "__main__":
     hangman_game = HangmanGame()
