@@ -33,7 +33,8 @@ class HangmanGame:
         self.guessed_letters = []
         self.wrong_letters = []
         self.right_letters = []
-        self.lives_remaining = 6
+        self.lives_remaining_default = 6
+        self.lives_remaining = self.lives_remaining_default
         self.num_wrong_words = 0
         self.revealed_word = None
         
@@ -138,8 +139,7 @@ class HangmanGame:
         self.clear_console()
         
         # Hangman ausgeben, der zu den aktuellen Leben passt
-        number_wrong_words = len(self.wrong_letters)
-        print(self.hangmans[number_wrong_words])
+        print(self.hangmans[self.lives_remaining_default - self.lives_remaining])
         
         # Wort ausgeben, das Unterstriche als Lücken für noch nicht erratene Buchstaben hat
         word_output = self.generate_word_output()
