@@ -143,7 +143,7 @@ class HangmanGame:
         print(" ".join(word_output))
         
         if self.revealed_word == self.secret_word_lower:
-            print("Gewonnen! (Hallo mein Lieber, Hast du ein Wort? KRATER!!")
+            print("Gewonnen! (Hallo mein Lieber, Hast du ein Wort? KRATER!!)")
             return
         
         if self.easy_mode:
