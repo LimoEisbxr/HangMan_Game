@@ -60,10 +60,14 @@ class HangmanGame:
                 ###################### WIP #######################
                 if not right_input:
                     self.lives_remaining -= 1
-                print(f"lives {self.lives_remaining}")
+                
                 if self.lives_remaining == 0:
                     self.game_finished(won=False)
-                    
+                
+                self.generate_word_output()
+                if self.revealed_word == self.secret_word_lower:
+                    self.game_finished(won=True)
+                
     def get_game_settings(self) -> None:
         """Geheimes Wort und den "Spielmodus" vom Benutzer bekommen
         """
@@ -141,10 +145,6 @@ class HangmanGame:
         word_output = self.generate_word_output()
         
         print(" ".join(word_output))
-        
-        if self.revealed_word == self.secret_word_lower:
-            self.game_finished(won=True)
-            return
         
         if self.easy_mode:
             print("Noch zu ratene Buchstaben: ", end="")
