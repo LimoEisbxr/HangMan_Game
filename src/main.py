@@ -5,7 +5,18 @@ import os
 import json
 import random
 import string
-print("\rImported!")
+import time
+import sys
+from getpass import getpass
+
+# Used to convert non-ASCII characters into the best ASCII representation
+try:
+    from unidecode import unidecode
+except ModuleNotFoundError:
+    os.system('pip install unidecode')
+    from unidecode import unidecode
+
+print("Imported!")
 
 class HangmanGame:
     def __init__(self) -> None:
@@ -83,18 +94,6 @@ class HangmanGame:
         
         # Usereingabe für den "Spielmodus" bekommen
         self.ask_game_mode()
-        
-    def get_user_input(self) -> str:
-        """Fragt den Benutzer nach seinem nächsten Buchstaben oder Wort
-
-        Returns:
-            str: Benutzereingabe
-        """
-        user_input = ""
-        while user_input == "":
-            user_input = input("Gib deinen nächsten Buchstaben oder das Lösungswort ein: ")
-            
-        return user_input
     
     def process_user_input(self, user_input: str):
         """_summary_
@@ -188,8 +187,10 @@ class HangmanGame:
             print("Wortliste bereits vorhanden.")
             
     def prepare_wordlist(self):
+        print("Loading Wordlist...")
         with open(self.wordlist_path, "r", encoding="utf-8") as f:
-            common_words = list(word.lower() for word in json.load(f))
+            common_words = list(self.convert_word_to_standard_characters(word.lower()) for word in json.load(f))
+        print("Wordlist loaded")
             
         self.wordlist_content = common_words
             
@@ -197,11 +198,17 @@ class HangmanGame:
     # Usereingabe für die Einstellung des Easy-Modes und überprüfen, ob die Eingabe valide ist
         while self.easy_mode == None:
             # easy_mode_input = input("Möchtest du den einfachen Modus aktivieren? (Y/N): ")
-            easy_mode_input = input("Möchtest du den einfachen Modus aktivieren? (Y / N, Enter): ").upper()
-            if easy_mode_input == "Y":
+            try:
+                easy_mode_input = input("Möchtest du den einfachen Modus aktivieren? (Y / N, Enter / Q zum Schließen): ").lower()
+            except (EOFError, KeyboardInterrupt):
+                self.close()
+            
+            if easy_mode_input == "y":
                 self.easy_mode = True
-            elif easy_mode_input == "N" or easy_mode_input == "":
+            elif easy_mode_input == "n" or easy_mode_input == "":
                 self.easy_mode = False
+            elif easy_mode_input == "q":
+                self.close()
             else:
                 print("Ungültige Eingabe! - mögliche Eingaben: Y - N")
                 
@@ -209,19 +216,46 @@ class HangmanGame:
         """Geheimes Wort vom Benutzer bekommen und überprüfen, ob es ein valides deutsches Wort ist
         """
         while self.secret_word_upper == None:
-            secret_word_input = input("Bitte gib das geheime Wort ein (ohne, dass die anderen Mitspieler zuschauen! / für ein zufälliges Wort leer lassen): ").strip()
+            try:
+                secret_word_input = getpass("Das geheime Wort eingeben (Das kann keiner sehen :) ) (leer für zufällig / Q zum Schließen): ").strip()
+            except (EOFError, KeyboardInterrupt):
+                self.close()
+                
             if secret_word_input == "":
-                # secret_word_num = random.randint(0, len(self.wordlist_content) - 1)
-                # secret_word_input = self.wordlist_content[secret_word_num]
                 secret_word_input = random.choice(self.wordlist_content).strip()
                 
+            secret_word_input = self.convert_word_to_standard_characters(secret_word_input)
+                
             secret_word_input_lower = secret_word_input.lower()
-            err = self.check_if_word_is_valid(secret_word_input_lower)
-            if not err:
+            
+            if secret_word_input_lower == "q":
+                self.close()
+                
+            
+            if not self.check_if_word_is_valid(secret_word_input_lower):
                 print("Bitte gib ein gültiges deutsches Wort ein!")
             else:
-                self.secret_word_upper = secret_word_input.upper()
                 self.secret_word_lower = secret_word_input_lower
+                self.secret_word_upper = secret_word_input_lower.upper()
+                
+    def get_user_input(self) -> str:
+        """Fragt den Benutzer nach seinem nächsten Buchstaben oder Wort
+
+        Returns:
+            str: Benutzereingabe
+        """
+        user_input = ""
+        while True:
+            try:
+                user_input = input("Gib deinen nächsten Buchstaben oder das Lösungswort ein: ").strip()
+            except (EOFError, KeyboardInterrupt):
+                self.close()
+            if user_input != "":
+                break
+            else:
+                self.print_gui()
+            
+        return user_input
                 
     def check_if_word_is_valid(self, word: str):
         """ Überprüft, ob das eingegebene Wort in der Wortliste enthalten ist
@@ -231,12 +265,25 @@ class HangmanGame:
         else:
             return False
         
+    def convert_word_to_standard_characters(self, word: str) -> str:
+        custom_mappings = {
+            'ü': 'ue',
+            'ö': 'oe',
+            'ä': 'ae',
+            'ß': 'ss'
+        }
+        
+        for char, replacement in custom_mappings.items():
+            word = word.replace(char, replacement)
+        
+        return unidecode(word)
+            
     def wait_for_keypress(self) -> None:
         """Wartet auf eine Benutzereingabe, bevor das Spiel fortgesetzt wird
         """
-        input("Drücke Enter um fortzufahren ")
+        input("Drücke Enter um Fortzufahren ")
         
-    def game_finished(self, won=False) -> None:
+    def game_finished(self, won: bool) -> None:
         self.print_gui()
         
         self.game_running = False
@@ -248,6 +295,9 @@ class HangmanGame:
         
         print(f"Das geheime Wort war ***{self.secret_word_lower.capitalize()}***")
         self.wait_for_keypress()
+        
+    def close(self) -> None:
+        sys.exit()
             
 if __name__ == "__main__":
     hangman_game = HangmanGame()
