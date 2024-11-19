@@ -1,6 +1,11 @@
-
 def get_hangmans():
-    hangmans = [r'''
+	"""Lädt die ASCII HangMans
+
+	Returns:
+		list: Liste mit den ASCII HangMans
+	"""
+
+	hangmans = [r'''
     +---+
     |   |
         |
@@ -51,7 +56,8 @@ def get_hangmans():
         |
   =========''']
     
-    return hangmans
-    
+	return hangmans
+
+# Wenn die Datei direkt ausgeführt wird, werden die HangMans ausgegeben
 if __name__ == "__main__":
     print(get_hangmans())
