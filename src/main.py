@@ -85,7 +85,10 @@ class HangmanGame:
         Returns:
             str: Benutzereingabe
         """
+        
         user_input = ""
+        
+        # Warten, bis der Benutzer etwas eingibt
         while user_input == "":
             user_input = input("Gib deinen nächsten Buchstaben oder das Lösungswort ein: ")
             
@@ -101,6 +104,7 @@ class HangmanGame:
             bool: Hat der Spieler einen richtigen Buchstaben geraten?
             bool: Hat der Spieler das ganze Wort erraten?
         """
+        
         # Benutzereingabe vorbereiten
         user_input_upper = user_input.upper().strip()
         
@@ -146,6 +150,11 @@ class HangmanGame:
         os.system("cls" if os.name == "nt" else "clear")
     
     def generate_word_output(self) -> list:
+        """Generiert eine Liste, die Buchstaben für erratene, als auch Unterstriche für noch nicht erratene Buchstaben enthält
+
+        Returns:
+            list: Buchstaben, oder _ für noch nicht erratene Buchstaben
+        """
         word_output = ["_"]*len(self.secret_word_upper)
         for char in self.right_letters:
             for i, letter in enumerate(self.secret_word_upper):
