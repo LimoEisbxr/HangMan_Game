@@ -90,7 +90,7 @@ class HangmanGame:
         self.ask_game_mode()
     
     def process_user_input(self, user_input: str):
-        """_summary_
+        """Verarbeitet die Benutzereingbe und überprüft, ob der Buchstabe richtig war
 
         Args:
             user_input (str): Benutzereingabe, die verarbeitet werden soll
