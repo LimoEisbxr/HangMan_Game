@@ -321,8 +321,14 @@ class HangmanGame:
     def wait_for_keypress(self) -> None:
         """Wartet auf eine Benutzereingabe, bevor das Spiel fortgesetzt wird
         """
-        
-        input("Drücke Enter um Fortzufahren ")
+        try:
+            user_input = input("Drücke Enter um Fortzufahren (Q zum Schließen) ")
+            # Wenn der Benutzer "q" eingibt, wird das Programm geschlossen
+            if user_input.lower() == "q":
+                self.close()
+                
+        except (EOFError, KeyboardInterrupt):
+            self.close()
         
     def game_finished(self, won: bool) -> None:
         """"Zeigt den Schluss-Bildschirm an
